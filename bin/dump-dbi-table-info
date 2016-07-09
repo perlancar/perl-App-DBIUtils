@@ -4,7 +4,6 @@ use 5.010001;
 use strict;
 use warnings;
 
-use Data::Dump qw(dump);
 use DBI;
 use Perinci::CmdLine::Any;
 
@@ -50,3 +49,4 @@ sub dump_dbi_table_info {
 Perinci::CmdLine::Any->new(url => '/main/dump_dbi_table_info')->run;
 
 # ABSTRACT:
+# PODNAME:
