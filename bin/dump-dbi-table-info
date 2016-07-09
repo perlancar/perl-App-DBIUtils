@@ -1,0 +1,52 @@
+#!perl
+
+use 5.010001;
+use strict;
+use warnings;
+
+use Data::Dump qw(dump);
+use DBI;
+use Perinci::CmdLine::Any;
+
+our %SPEC;
+
+$SPEC{dump_dbi_table_info} = {
+    v => 1.1,
+    summary => 'Dump DBI table_info() information',
+    args => {
+        dsn => {
+            schema => 'str*',
+            req => 1,
+            pos => 0,
+        },
+        user => {
+            schema => 'str*',
+        },
+        password => {
+            schema => 'str*',
+        },
+        catalog => {
+            schema => 'str*',
+        },
+        schema => {
+            schema => 'str*',
+            default => 'main',
+        },
+    },
+};
+sub dump_dbi_table_info {
+    my %args = @_;
+
+    my $dbh = DBI->connect($args{dsn}, $args{user}, $args{password},
+                           {RaiseError=>1});
+    my @rows;
+    my $sth = $dbh->table_info($args{catalog}, $args{schema}, "%", undef);
+    while (my $row = $sth->fetchrow_hashref) {
+        push @rows, $row;
+    }
+    [200, "OK", \@rows];
+}
+
+Perinci::CmdLine::Any->new(url => '/main/dump_dbi_table_info')->run;
+
+# ABSTRACT:
