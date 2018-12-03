@@ -4,7 +4,6 @@ use 5.010001;
 use strict;
 use warnings;
 
-use DBI;
 use Perinci::CmdLine::Any;
 
 our %SPEC;
@@ -26,20 +25,27 @@ $SPEC{dump_dbi_table_info} = {
         },
         catalog => {
             schema => 'str*',
+            default => '',
         },
         schema => {
             schema => 'str*',
-            default => 'main',
         },
     },
 };
 sub dump_dbi_table_info {
+    require DBIx::Connect::Any;
+
     my %args = @_;
 
-    my $dbh = DBI->connect($args{dsn}, $args{user}, $args{password},
-                           {RaiseError=>1});
+    my $dbh = DBIx::Connect::Any->connect(
+        $args{dsn}, $args{user}, $args{password},
+        {RaiseError=>1});
+
+    my $catalog = $args{catalog} // '';
+    my $schema  = $args{schema} // $args{dsn} =~ /\ADBI:SQLite:/ ? 'main' : '';
+
     my @rows;
-    my $sth = $dbh->table_info($args{catalog}, $args{schema}, "%", undef);
+    my $sth = $dbh->table_info($catalog, $schema, "%", undef);
     while (my $row = $sth->fetchrow_hashref) {
         push @rows, $row;
     }
